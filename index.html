@@ -17,7 +17,20 @@
 	<script type="text/javascript" src="./js/jspdf.plugin.split_text_to_size.js"></script>
 	<script type="text/javascript" src="./js/jspdf.plugin.standard_fonts_metrics.js"></script>
 	<script type="text/javascript" src="./js/mustache.js"></script>
-	
+	<style>.footer {
+		margin-top:20px;
+	}
+	</style>
+	<script type="text/javascript">
+/* <![CDATA[ */
+    (function() {
+        var s = document.createElement('script'), t = document.getElementsByTagName('script')[0];
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = 'http://api.flattr.com/js/0.6/load.js?mode=auto';
+        t.parentNode.insertBefore(s, t);
+    })();
+/* ]]> */</script>
 </head>
 
 <body>
@@ -63,18 +76,51 @@
         	<option>Enttäuscht,</option>
         	<option>Genervt,</option>
         	<option>Voller Wut,</option>
+        	<option>Mit den gesellschaftlich gebotenen gerade noch freundlichen Grüßen,</option>
+        	<option>Arrrrgh,</option>
+        	<option>ROFLCOPTER GTFO</option>
+        	<option>Thanks for all the fish</option>
         </select>
       </div>
     </div>
 </div>
 
-<a href="javascript:renderPDF()" class="button success">Download</a></div>
+<div class="row">
+	<div class="large-6 columns">
+		<a href="javascript:renderPDF()" class="button success">PDF Download</a>
+		<h4>How-To</h4>
+		<ol>
+			<li>Formular ausfüllen</li>
+			<li>PDF herunterladen</li>
+			<li>Ausdrucken</li>
+			<li>Auf der Linie unterschreiben</li>
+			<li>In Briefumschlag stecken (hast Du unterschrieben?)</li>
+			<li>Briemarke zu 0,58€ aufkleben</li>
+			<li>In den nächstbesten Postbriefkasten einwerfen</li>
+			<li>Alternativ als Fax an +49 30 285 993 01 schicken</li>
+		</ol>
+	</div>
+	<!--
+	<a href="javascript:openEmail()" class="button success">Email öffnen</a>
+	<div class="large-6 columns">
+		<h4>How-To</h4>
+		<ol>
+			<li>Formular ausfüllen</li>
+			<li>Auf "Email öffnen" klicken</li>
+			<li>Im sich, hoffentlich, öffnenden Mailprogramm auf Absenden klicken.</li>
+		</ol>
+	</div>
+	-->
 </div>
 
+<p style="color:#999">Laut §5 (2) der <a href="http://www.c-base.de/satzung.html">c-base e.V. Satzung</a> ist der Austritt nur in Schriftform (unterschriebener Brief oder Fax) und mit einer Frist von zwei Wochen zum Monatsende möglich. Das Formular berücksichtigt diesen Fall und setzt das nächstmögliche Austrittsdatum ein.</p>
+<p style="color:#999">Hinweis: Es werden keine Daten gespeichert, das PDF wird lokal per Javascript generiert</p>
+
+
+<div class="footer">Made by <a href="https://twitter.com/viirus42">@viirus42</a> und <a href="https://twitter.com/pylonc">@PylonC</a>.  <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://viirus.github.io/piratenaustritt/"></a>
 <script>
 
 function renderPDF() {
-
 	var today = new Date();
 	var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 	if (Math.round((lastDay - today)/1000/60/60/24)+1 < 15) {
@@ -96,12 +142,13 @@ function renderPDF() {
 	day: lastDay.getDate(),
 	month: lastDay.getMonth()+1,
 	year: lastDay.getFullYear(),
+	valediction: valediction,
 	reason: reason
 };
 
 	var letterdate = Mustache.render("{{city}}, den {{day}}.{{month}}.{{year}}", {city: city, day: today.getDate(), month: today.getMonth()+1, year: today.getFullYear()});
 	var returnaddress = Mustache.render("{{name}} • {{street}} • {{postalcode}} {{city}}", {name: name, street: street, postalcode: postalcode, city: city});
-	var text = Mustache.render("Sehr geehrter Vorstand,\n\nHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim c-base e.V. zum {{day}}.{{month}}.{{year}}.\n{{diff}}\n{{reason}}", view);
+	var text = Mustache.render("Sehr geehrter Vorstand,\n\nHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim c-base e.V. zum {{day}}.{{month}}.{{year}}.\n\n{{reason}}", view);
 
 	var doc = new jsPDF();
 
@@ -125,8 +172,44 @@ function renderPDF() {
 	doc.setDrawColor(100,100,100);
 	doc.line(20, 215, 80, 215);
 	doc.text(20, 222, name)
+	ga('send', 'pageview', '/render-pdf');
 	doc.output("datauri");
 }
+
+function openEmail() {
+	var today = new Date();
+	var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+	if (Math.round((lastDay - today)/1000/60/60/24)+1 < 15) {
+		var lastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+	}
+	var name= $("#name").val()
+	var nick = $("#nick").val()
+	var memberid= $("#memberid").val()
+	var address= $("#address").val()
+	var street = $("#street").val()
+	var postalcode = $("#postalcode").val()
+	var city = $("#city").val()
+	var reason= $("#reason").val()
+	var valediction= $("#valediction option:selected").val()
+
+	var view = {
+	email: "vorstand@cbase.de",
+	name: name,
+	nick: nick,
+	memberid: memberid,
+	day: lastDay.getDate(),
+	month: lastDay.getMonth()+1,
+	year: lastDay.getFullYear(),
+	valediction: valediction,
+	reason: reason
+};
+
+	var text = Mustache.render("mailto:{{email}}?subject=Austritt&body=Sehr geehrter Vorstand,%0D%0A%0D%0AHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim c-base e.V. zum {{day}}.{{month}}.{{year}}.%0D%0A%0D%0A{{reason}}%0D%0A%0D%0A{{valediction}}%0D%0A{{name}}", view);
+	window.location = text;
+}
 </script>
+
+</script>
+
 </body>
 </html>
