@@ -35,6 +35,15 @@
       <div class="large-4 columns">
         <input type="text" placeholder="Member UID" id="memberid">
       </div>
+      <div class="large-6 columns">
+        <input type="text" placeholder="Straße + Hausnummer" id="street">
+      </div>
+      <div class="large-2 columns">
+        <input type="text" placeholder="PLZ" id="postalcode">
+      </div>
+      <div class="large-4 columns">
+        <input type="text" placeholder="Ort" id="city">
+      </div>
     </div>
 
     <div class="row">
@@ -64,44 +73,53 @@
 
 <script>
 
-var organisations = {
-	0:{
-		"name":"c-base e.V.",
-		"zusatz":"z.Hd. Vorstand",
-		"address":"Rungestr. 20",
-		"city":"10179 Berlin"
-	}
-}
-
 function renderPDF() {
 
+	var today = new Date();
+	var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+	if (Math.round((lastDay - today)/1000/60/60/24)+1 < 15) {
+		var lastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+	}
 	var name= $("#name").val()
 	var nick = $("#nick").val()
 	var memberid= $("#memberid").val()
-	var organisation= $("#organisation").val()
+	var street = $("#street").val()
+	var postalcode = $("#postalcode").val()
+	var city = $("#city").val()
 	var reason= $("#reason").val()
 	var valediction= $("#valediction option:selected").val()
 
-		var view = {
-	  name: name,
-		nick: nick,
-	  memberid: memberid,
-	  reason: reason
-	};
+	var view = {
+	name: name,
+	nick: nick,
+	memberid: memberid,
+	day: lastDay.getDate(),
+	month: lastDay.getMonth()+1,
+	year: lastDay.getFullYear(),
+	reason: reason
+};
 
-	var text = Mustache.render("Sehr geehrter Vorstand,\n\nHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}) meine Mitgliedschaft beim c-base e.V. {{reason}}", view);
+	var letterdate = Mustache.render("{{city}}, den {{day}}.{{month}}.{{year}}", {city: city, day: today.getDate(), month: today.getMonth()+1, year: today.getFullYear()});
+	var returnaddress = Mustache.render("{{name}} • {{street}} • {{postalcode}} {{city}}", {name: name, street: street, postalcode: postalcode, city: city});
+	var text = Mustache.render("Sehr geehrter Vorstand,\n\nHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim c-base e.V. zum {{day}}.{{month}}.{{year}}.\n{{diff}}\n{{reason}}", view);
 
 	var doc = new jsPDF();
-	doc.setFontSize(13);
 
-	doc.text(27,  53, organisations[organisation]["name"]);
-	doc.text(27,  53, organisations[organisation]["zusatz"]);
-	doc.text(27,  61, organisations[organisation]["address"]);
-	doc.text(27,  69, organisations[organisation]["city"]);
+	doc.setFontSize(8);
+	doc.text(27, 46, returnaddress);
+	doc.line(20, 47, 100, 47);
 
-	doc.setFontSize(16);
-	lines = doc.splitTextToSize(text, 180)
-	doc.text(20, 100, lines)
+	doc.setFontSize(12);
+
+	doc.text(27,  53, "c-base e.V.");
+	doc.text(27,  58, "z.Hd. Vorstand");
+	doc.text(27,  63, "Rungestr. 20");
+	doc.text(27,  68, "10179 Berlin");
+
+	doc.setFontSize(12);
+	doc.text(135, 100, letterdate);
+	lines = doc.splitTextToSize(text, 170)
+	doc.text(20, 120, lines)
 
 	doc.text(20, 200, valediction);
 	doc.setDrawColor(100,100,100);
