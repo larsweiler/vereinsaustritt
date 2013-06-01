@@ -172,7 +172,6 @@ function renderPDF() {
 	doc.setDrawColor(100,100,100);
 	doc.line(20, 215, 80, 215);
 	doc.text(20, 222, name)
-	ga('send', 'pageview', '/render-pdf');
 	doc.output("datauri");
 }
 
