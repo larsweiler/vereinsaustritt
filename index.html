@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 	<meta charset="utf-8">
-	<title>c-base Austrittsgenerator</title>
+	<title>Vereinsaustrittgenerator</title>
 
 
 	<link rel="stylesheet" href="./css/foundation.min.css">
@@ -35,7 +35,7 @@
 
 <body>
 	<div class="row" style="max-width:50em">
-		<h1>c-base Austrittsgenerator</h1>
+		<h1>Vereinsaustrittgenerator</h1>
   <div class="small-12"><div class="panel">
   	<label>Identifizierungsmerkmale</label>
 <div class="row">
@@ -43,10 +43,10 @@
         <input type="text" placeholder="Name" id="name">
       </div>
       <div class="large-4 columns">
-        <input type="text" placeholder="Nick" id="nick">
+        <input type="text" placeholder="Nick (optional)" id="nick">
       </div>
       <div class="large-4 columns">
-        <input type="text" placeholder="Member UID" id="memberid">
+        <input type="text" placeholder="Mitgliedsnummer (wenn zur Hand)" id="memberid">
       </div>
       <div class="large-6 columns">
         <input type="text" placeholder="Straße + Hausnummer" id="street">
@@ -58,7 +58,16 @@
         <input type="text" placeholder="Ort" id="city">
       </div>
     </div>
-
+		<div class="row">
+      <div class="large-12 columns">
+        <label>Verein</label>
+        <select id="organisation">
+					<option value="0">Bitte wählen</option>
+        	<option value="1">c-base e.V.</option>
+        	<option value="2">Chaos Computer Club e.V.</option>
+				</select>
+			</div>
+		</div>
     <div class="row">
       <div class="large-12 columns">
         <label>Austrittsgrund (optional)</label>
@@ -95,37 +104,68 @@
 			<li>Ausdrucken</li>
 			<li>Auf der Linie unterschreiben</li>
 			<li>In Briefumschlag stecken (hast Du unterschrieben?)</li>
-			<li>Briemarke zu 0,58€ aufkleben</li>
+			<li>Briefmarke zu 0,58€ aufkleben</li>
 			<li>In den nächstbesten Postbriefkasten einwerfen</li>
 			<li>Alternativ als Fax an +49 30 285 993 01 schicken</li>
 		</ol>
 	</div>
-	<!--
-	<a href="javascript:openEmail()" class="button success">Email öffnen</a>
-	<div class="large-6 columns">
-		<h4>How-To</h4>
-		<ol>
-			<li>Formular ausfüllen</li>
-			<li>Auf "Email öffnen" klicken</li>
-			<li>Im sich, hoffentlich, öffnenden Mailprogramm auf Absenden klicken.</li>
-		</ol>
+	<div class="large-6 columns" id="email">
 	</div>
-	-->
 </div>
 
-<p style="color:#999">Laut §5 (2) der <a href="http://www.c-base.de/satzung.html">c-base e.V. Satzung</a> ist der Austritt nur in Schriftform (unterschriebener Brief oder Fax) und mit einer Frist von zwei Wochen zum Monatsende möglich. Das Formular berücksichtigt diesen Fall und setzt das nächstmögliche Austrittsdatum ein.</p>
+<p style="color:#999" id="footnote"></p>
 <p style="color:#999">Hinweis: Es werden keine Daten gespeichert, das PDF wird lokal per Javascript generiert</p>
 
 
 <div class="footer">Made by <a href="https://twitter.com/viirus42">@viirus42</a> und <a href="https://twitter.com/pylonc">@PylonC</a>.  <a class="FlattrButton" style="display:none;" rev="flattr;button:compact;" href="http://viirus.github.io/piratenaustritt/"></a>
-<script>
 
-function renderPDF() {
-	var today = new Date();
-	var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-	if (Math.round((lastDay - today)/1000/60/60/24)+1 < 15) {
-		var lastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+
+
+<script>
+var organisations = {
+	0:{
+		"name":"n/a",
+		"appendix":"n/a",
+		"address":"n/a",
+		"city":"n/a",
+		"email":"n/a"
+	},
+	1:{
+		"name":"c-base e.V.",
+		"appendix":"z.Hd. Vorstand",
+		"address":"Rungestr. 20",
+		"city":"D-10179 Berlin",
+		"email":"vorstand@c-base.de"
+	},
+	2:{
+		"name":"Chaos Computer Club e.V.",
+		"appendix":"Mitgliederverwaltung",
+		"address":"Postfach 76 21 66",
+		"city":"D-22069 Hamburg",
+		"email":"office@ccc.de"
 	}
+}
+
+$('#organisation').change(function() {
+	var organisation= $("#organisation").val()
+	var showemail = document.getElementById('email');
+	var showfootnote = document.getElementById('footnote');
+
+	// Liste der passenden Organisations anhand ID
+	if ($.inArray(parseInt($(this).val()), [2]) > -1) {
+		showemail.innerHTML = '<a href="javascript:openEmail()" class="button success">Email öffnen</a><h4>How-To</h4><ol><li>Formular ausfüllen</li><li>Auf "Email öffnen" klicken</li><li>Im sich, hoffentlich, öffnenden Mailprogramm auf Absenden klicken.</li></ol>';
+	} else {
+		showemail.innerHTML = '';
+	}
+
+	if ($.inArray(parseInt($(this).val()), [1]) > -1) {
+		showfootnote.innerHTML = 'Laut §5 (2) der <a href="http://www.c-base.de/satzung.html">c-base e.V. Satzung</a> ist der Austritt nur in Schriftform (unterschriebener Brief oder Fax) und mit einer Frist von zwei Wochen zum Monatsende möglich. Das Formular berücksichtigt diesen Fall und setzt das nächstmögliche Austrittsdatum ein.'
+	} else {
+		showfootnote.innerHTML = '';
+	}
+})
+
+function renderText() {
 	var name= $("#name").val()
 	var nick = $("#nick").val()
 	var memberid= $("#memberid").val()
@@ -133,78 +173,82 @@ function renderPDF() {
 	var postalcode = $("#postalcode").val()
 	var city = $("#city").val()
 	var reason= $("#reason").val()
+	var organisation= $("#organisation").val()
 	var valediction= $("#valediction option:selected").val()
-
-	var view = {
-	name: name,
-	nick: nick,
-	memberid: memberid,
-	day: lastDay.getDate(),
-	month: lastDay.getMonth()+1,
-	year: lastDay.getFullYear(),
-	valediction: valediction,
-	reason: reason
-};
-
+	var today = new Date();
+	if (organisation in [0]) {
+		var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+		if (Math.round((lastDay - today)/1000/60/60/24)+1 < 15) {
+			var lastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+		}
+	}
+	
 	var letterdate = Mustache.render("{{city}}, den {{day}}.{{month}}.{{year}}", {city: city, day: today.getDate(), month: today.getMonth()+1, year: today.getFullYear()});
 	var returnaddress = Mustache.render("{{name}} • {{street}} • {{postalcode}} {{city}}", {name: name, street: street, postalcode: postalcode, city: city});
-	var text = Mustache.render("Sehr geehrter Vorstand,\n\nHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim c-base e.V. zum {{day}}.{{month}}.{{year}}.\n\n{{reason}}", view);
+	
+	
+	var text = Mustache.render("Sehr geehrter Vorstand,\n\nHiermit beende ich, {{name}} (", {name: name});
+	if (nick != "") {
+		text += Mustache.render("Nick: {{nick}}, ", {nick: nick});
+	}
+	text += Mustache.render("Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim {{club}} zum ", {memberid: memberid, club: organisations[organisation]["name"]});
+	if (lastDay) {
+		text += Mustache.render("{{day}}.{{month}}.{{year}}.", {day: lastDay.getDate(), month: lastDay.getMonth()+1, year: lastDay.getFullYear()});
+	} else {
+		text += Mustache.render("nächstmöglichen Zeitpunkt.");
+	}
+	if ($.inArray(parseInt(organisation), [1]) > -1) {
+		text += Mustache.render(" Gleichzeitig widerrufe ich dem erteilten Auftrag zur Teilnahme am Lastschrifteinzugverfahren.");
+	}
+	if (reason != "") {
+		text += Mustache.render("\n\n{{reason}}", {reason: reason});
+	}
 
+	return {
+		"returnaddress": returnaddress,
+		"letterdate": letterdate,
+		"text": text,
+		"valediction": valediction,
+		"name": name
+	};
+}
+
+
+function renderPDF() {
+	var organisation= $("#organisation").val()
+	text = renderText();
 	var doc = new jsPDF();
 
 	doc.setFontSize(8);
-	doc.text(27, 46, returnaddress);
+	doc.text(27, 46, text['returnaddress']);
 	doc.line(20, 47, 100, 47);
 
 	doc.setFontSize(12);
 
-	doc.text(27,  53, "c-base e.V.");
-	doc.text(27,  58, "z.Hd. Vorstand");
-	doc.text(27,  63, "Rungestr. 20");
-	doc.text(27,  68, "10179 Berlin");
+	doc.text(27,  53, organisations[organisation]["name"]);
+	doc.text(27,  58, organisations[organisation]["appendix"]);
+	doc.text(27,  63, organisations[organisation]["address"]);
+	doc.text(27,  68, organisations[organisation]["city"]);
 
 	doc.setFontSize(12);
-	doc.text(135, 100, letterdate);
-	lines = doc.splitTextToSize(text, 170)
+	doc.text(135, 100, text['letterdate']);
+	lines = doc.splitTextToSize(text['text'], 170)
 	doc.text(20, 120, lines)
 
-	doc.text(20, 200, valediction);
+	doc.text(20, 200, text['valediction']);
 	doc.setDrawColor(100,100,100);
 	doc.line(20, 215, 80, 215);
-	doc.text(20, 222, name)
+	doc.text(20, 222, text['name'])
 	doc.output("datauri");
 }
 
 function openEmail() {
-	var today = new Date();
-	var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-	if (Math.round((lastDay - today)/1000/60/60/24)+1 < 15) {
-		var lastDay = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-	}
-	var name= $("#name").val()
-	var nick = $("#nick").val()
-	var memberid= $("#memberid").val()
-	var address= $("#address").val()
-	var street = $("#street").val()
-	var postalcode = $("#postalcode").val()
-	var city = $("#city").val()
-	var reason= $("#reason").val()
-	var valediction= $("#valediction option:selected").val()
-
-	var view = {
-	email: "vorstand@cbase.de",
-	name: name,
-	nick: nick,
-	memberid: memberid,
-	day: lastDay.getDate(),
-	month: lastDay.getMonth()+1,
-	year: lastDay.getFullYear(),
-	valediction: valediction,
-	reason: reason
-};
-
-	var text = Mustache.render("mailto:{{email}}?subject=Austritt&body=Sehr geehrter Vorstand,%0D%0A%0D%0AHiermit beende ich, {{name}} (Nick: {{nick}}, Mitgliedsnummer: {{memberid}}), meine Mitgliedschaft beim c-base e.V. zum {{day}}.{{month}}.{{year}}.%0D%0A%0D%0A{{reason}}%0D%0A%0D%0A{{valediction}}%0D%0A{{name}}", view);
-	window.location = text;
+	var organisation= $("#organisation").val()
+	text = renderText();
+	content = text['text'].replace(/\n/gm, "%0D%0A");
+	var mail = Mustache.render("mailto:{{email}}?subject=Austritt&body={{text}}", {email: organisations[organisation]["email"], text: content});
+	mail += Mustache.render("%0D%0A%0D%0A{{valediction}}%0D%0A{{name}}", {valediction: text['valediction'], name: text['name']});
+	window.location = mail;
 }
 </script>
 
