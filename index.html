@@ -106,7 +106,6 @@
 			<li>In Briefumschlag stecken (hast Du unterschrieben?)</li>
 			<li>Briefmarke zu 0,58€ aufkleben</li>
 			<li>In den nächstbesten Postbriefkasten einwerfen</li>
-			<li>Alternativ als Fax an +49 30 285 993 01 schicken</li>
 		</ol>
 	</div>
 	<div class="large-6 columns" id="email">
@@ -159,7 +158,7 @@ $('#organisation').change(function() {
 	}
 
 	if ($.inArray(parseInt($(this).val()), [1]) > -1) {
-		showfootnote.innerHTML = 'Laut §5 (2) der <a href="http://www.c-base.de/satzung.html">c-base e.V. Satzung</a> ist der Austritt nur in Schriftform (unterschriebener Brief oder Fax) und mit einer Frist von zwei Wochen zum Monatsende möglich. Das Formular berücksichtigt diesen Fall und setzt das nächstmögliche Austrittsdatum ein.'
+		showfootnote.innerHTML = 'Laut §5 (2) der <a href="http://www.c-base.de/satzung.html">c-base e.V. Satzung</a> ist der Austritt nur in Schriftform (unterschriebener Brief oder Fax an an +49 30 285 993 01) und mit einer Frist von zwei Wochen zum Monatsende möglich. Das Formular berücksichtigt diesen Fall und setzt das nächstmögliche Austrittsdatum ein.'
 	} else {
 		showfootnote.innerHTML = '';
 	}
